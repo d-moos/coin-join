@@ -24,7 +24,7 @@ export const fetchCoinObjects = async (objectIds: string[]): Promise<any[]> => {
 	});
 };
 
-export const split = async (objectId: string, type: string, split_amount: number) => {
+export const oneTimeSplit = async (objectId: string, type: string, split_amount: number) => {
 	const wallet = new SuiWalletAdapter();
 	if (!wallet.connected) await wallet.connect();
 
@@ -34,6 +34,20 @@ export const split = async (objectId: string, type: string, split_amount: number
 		function: 'split',
 		typeArguments: [type],
 		arguments: [objectId, split_amount],
+		gasBudget: 1000
+	});
+};
+
+export const multiSplit = async (objectId: string, type: string, count: number) => {
+	const wallet = new SuiWalletAdapter();
+	if (!wallet.connected) await wallet.connect();
+
+	return await wallet.executeMoveCall({
+		packageObjectId: '0x02',
+		module: 'coin',
+		function: 'split_n',
+		typeArguments: [type],
+		arguments: [objectId, count],
 		gasBudget: 1000
 	});
 };

@@ -1,5 +1,11 @@
 <script>
-	import { fetchCoinObjectRefs, fetchCoinObjects, groupBy, split } from './../sdk/utils';
+	import {
+		fetchCoinObjectRefs,
+		fetchCoinObjects,
+		groupBy,
+		multiSplit,
+		oneTimeSplit
+	} from './../sdk/utils';
 	import { onMount } from 'svelte';
 	import CoinTypeComboBox from './CoinTypeComboBox.svelte';
 	import CoinObjectComboBox from './CoinObjectComboBox.svelte';
@@ -22,7 +28,9 @@
 		successBox.visible = false;
 
 		try {
-			const receipt = await split(selectedObject.id, selectedType, splitAmount);
+			const receipt = isOneTime
+				? await oneTimeSplit(selectedObject.id, selectedType, splitAmount)
+				: await multiSplit(selectedObject.id, selectedType, splitAmount);
 			if (receipt.effects.status.status === 'failure') {
 				showError('Error', receipt.effects.status.error);
 			} else {
@@ -53,6 +61,7 @@
 	let selectedType = undefined;
 	let selectedObject = undefined;
 	let splitAmount;
+	let isOneTime = false;
 
 	let successBox = {
 		visible: false,
@@ -75,6 +84,36 @@
 	{:then coinObjects}
 		<CoinObjectComboBox {coinObjects} bind:selectedObject />
 	{/await}
+</div>
+
+<div class="mt-3">
+	<span class="block text-sm font-medium text-gray-700">Mode</span>
+	<fieldset class="mt-2">
+		<div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+			<div class="flex items-center">
+				<input
+					id="one-time"
+					bind:group={isOneTime}
+					value={true}
+					type="radio"
+					checked
+					class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+				/>
+				<label for="one-time" class="ml-3 block text-sm font-medium text-gray-700">One Time</label>
+			</div>
+
+			<div class="flex items-center">
+				<input
+					id="multi"
+					bind:group={isOneTime}
+					value={false}
+					type="radio"
+					class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+				/>
+				<label for="multi" class="ml-3 block text-sm font-medium text-gray-700">Multi Split</label>
+			</div>
+		</div>
+	</fieldset>
 </div>
 
 <div class="mt-3">

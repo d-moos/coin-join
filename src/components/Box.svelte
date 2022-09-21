@@ -1,5 +1,10 @@
 <script>
 	import Split from './Split.svelte';
+	import { wallet } from './../stores/wallet';
 </script>
 
-<Split address="0x71b2e2147781227433a9b8d8436d528ad8f6dd84" />
+{#await $wallet.getAccounts()}
+	loading accounts
+{:then accounts}
+	<Split address={accounts[0]} />
+{/await}
